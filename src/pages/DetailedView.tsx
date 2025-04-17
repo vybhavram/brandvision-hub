@@ -1,12 +1,12 @@
 
 import { motion } from "framer-motion";
 import MainLayout from "@/components/layout/MainLayout";
-import DetailedViewTable from "@/components/detailed-view/DetailedViewTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Calendar, ChevronDown, Download, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
+import AsinTimeline from "@/components/detailed-view/AsinTimeline";
 
 const DetailedView = () => {
   return (
@@ -68,15 +68,15 @@ const DetailedView = () => {
             Parent ASIN: B08MASTER
           </Badge>
           <Badge variant="outline" className="bg-secondary/50">
-            3 Child ASINs
+            40 ASINs
           </Badge>
           <Badge variant="outline" className="bg-secondary/50">
             Data Updated: 30 min ago
           </Badge>
         </div>
         
-        {/* Detailed View Table */}
-        <DetailedViewTable />
+        {/* Timeline View */}
+        <AsinTimeline />
       </motion.div>
     </MainLayout>
   );
