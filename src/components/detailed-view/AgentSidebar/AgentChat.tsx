@@ -1,10 +1,9 @@
-
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
-import { Send, Hash, Robot } from "lucide-react";
+import { Send, Hash, Bot } from "lucide-react";
 import { ChatMessage } from "@/lib/dummy-data";
 
 interface AgentChatProps {
@@ -16,7 +15,6 @@ const AgentChat = ({ messages, onSendMessage }: AgentChatProps) => {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -36,7 +34,6 @@ const AgentChat = ({ messages, onSendMessage }: AgentChatProps) => {
   };
   
   const formatMessageContent = (content: string) => {
-    // Add formatting for ASIN tags (e.g., #B001234)
     return content.replace(
       /#(B[0-9]{6})/g,
       '<span class="inline-flex items-center rounded-md bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800"><span class="mr-1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3v18"/><path d="M14 3v18"/></svg></span>$1</span>'
@@ -73,7 +70,7 @@ const AgentChat = ({ messages, onSendMessage }: AgentChatProps) => {
                     </div>
                   ) : (
                     <div className="bg-blue-100 text-blue-800 h-full w-full flex items-center justify-center">
-                      <Robot className="h-4 w-4" />
+                      <Bot className="h-4 w-4" />
                     </div>
                   )}
                 </Avatar>

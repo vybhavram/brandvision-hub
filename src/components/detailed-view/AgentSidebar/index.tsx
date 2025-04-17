@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
@@ -10,7 +9,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { 
-  Robot, 
+  Bot, 
   MessageSquare, 
   X 
 } from "lucide-react";
@@ -32,7 +31,6 @@ const AgentSidebar = () => {
   const [activeChat, setActiveChat] = useState<string | null>(null);
   const [currentChatMessages, setCurrentChatMessages] = useState<ChatMessage[]>([]);
   
-  // Initialize data on mount
   useEffect(() => {
     const mockAlerts = generateMockAgentAlerts();
     const mockChats = generateMockChatHistory();
@@ -40,14 +38,12 @@ const AgentSidebar = () => {
     setAlerts(mockAlerts);
     setChatHistory(mockChats);
     
-    // Set the first chat as active by default if there are any chats
     if (mockChats.length > 0) {
       setActiveChat(mockChats[0].id);
       setCurrentChatMessages(mockChats[0].messages);
     }
   }, []);
   
-  // Update current chat messages when active chat changes
   useEffect(() => {
     if (activeChat) {
       const chat = chatHistory.find(c => c.id === activeChat);
@@ -59,7 +55,6 @@ const AgentSidebar = () => {
     }
   }, [activeChat, chatHistory]);
   
-  // Handle dismissing an alert
   const handleDismissAlert = (alertId: string) => {
     setAlerts(prevAlerts => 
       prevAlerts.map(alert => 
@@ -70,7 +65,6 @@ const AgentSidebar = () => {
     );
   };
   
-  // Handle taking action on an alert
   const handleActionAlert = (alertId: string) => {
     setAlerts(prevAlerts => 
       prevAlerts.map(alert => 
@@ -80,7 +74,6 @@ const AgentSidebar = () => {
       )
     );
     
-    // Create a new chat related to this alert if one doesn't exist
     const alert = alerts.find(a => a.id === alertId);
     if (alert) {
       const newChatId = `chat-alert-${alertId}`;
@@ -110,10 +103,8 @@ const AgentSidebar = () => {
     }
   };
   
-  // Handle sending a new message
   const handleSendMessage = (content: string) => {
     if (!activeChat) {
-      // Create a new chat if none is active
       handleNewChat(content);
       return;
     }
@@ -126,17 +117,14 @@ const AgentSidebar = () => {
       timestamp: now
     };
     
-    // Extract any ASIN references from the message content
     const asinMatches = content.match(/#(B[0-9]{6})/g);
     if (asinMatches) {
       newMessage.asinReferences = asinMatches.map(match => match.substring(1));
     }
     
-    // Update current messages
     const updatedMessages = [...currentChatMessages, newMessage];
     setCurrentChatMessages(updatedMessages);
     
-    // Update chat history
     setChatHistory(prevChats => 
       prevChats.map(chat => 
         chat.id === activeChat 
@@ -149,7 +137,6 @@ const AgentSidebar = () => {
       )
     );
     
-    // Simulate an agent response after a short delay
     setTimeout(() => {
       const responseNow = new Date().toISOString();
       let responseContent = "I'm analyzing your request...";
@@ -170,11 +157,9 @@ const AgentSidebar = () => {
         timestamp: responseNow
       };
       
-      // Update current messages with agent response
       const messagesWithResponse = [...updatedMessages, agentResponse];
       setCurrentChatMessages(messagesWithResponse);
       
-      // Update chat history
       setChatHistory(prevChats => 
         prevChats.map(chat => 
           chat.id === activeChat 
@@ -189,12 +174,10 @@ const AgentSidebar = () => {
     }, 1500);
   };
   
-  // Handle selecting a chat from history
   const handleSelectChat = (chatId: string) => {
     setActiveChat(chatId);
   };
   
-  // Handle creating a new chat
   const handleNewChat = (initialMessage?: string) => {
     const now = new Date().toISOString();
     const newChatId = `chat-${Date.now()}`;
@@ -223,7 +206,6 @@ const AgentSidebar = () => {
     setActiveChat(newChatId);
     setCurrentChatMessages(initialMessages);
     
-    // If there was an initial message, simulate an agent response
     if (initialMessage) {
       handleSendMessage(initialMessage);
     }
@@ -231,21 +213,19 @@ const AgentSidebar = () => {
   
   return (
     <>
-      {/* Floating action button to open the sidebar */}
       <Button
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full z-50 shadow-lg"
         onClick={() => setIsOpen(true)}
       >
-        <Robot className="h-6 w-6" />
+        <Bot className="h-6 w-6" />
       </Button>
       
-      {/* Drawer for mobile devices */}
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
         <DrawerContent className="h-[90vh] mx-auto w-full max-w-md rounded-t-[10px]">
           <DrawerHeader className="border-b pb-2">
             <div className="flex items-center justify-between">
               <DrawerTitle className="flex items-center">
-                <Robot className="h-5 w-5 mr-2 text-primary" />
+                <Bot className="h-5 w-5 mr-2 text-primary" />
                 Brand Assistant
               </DrawerTitle>
               <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
@@ -255,14 +235,12 @@ const AgentSidebar = () => {
           </DrawerHeader>
           
           <div className="p-4 flex flex-col h-[calc(90vh-60px)]">
-            {/* Alerts section */}
             <AgentAlerts
               alerts={alerts}
               onDismiss={handleDismissAlert}
               onAction={handleActionAlert}
             />
             
-            {/* Chat history */}
             <ChatHistory
               chats={chatHistory}
               activeChat={activeChat}
@@ -270,7 +248,6 @@ const AgentSidebar = () => {
               onNewChat={() => handleNewChat()}
             />
             
-            {/* Current chat */}
             <div className="flex-1 bg-background rounded-md border overflow-hidden flex flex-col">
               {activeChat ? (
                 <AgentChat

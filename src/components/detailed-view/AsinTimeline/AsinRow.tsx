@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -6,7 +5,7 @@ import {
   ChevronDown, 
   Pencil, 
   Flag, 
-  Robot, 
+  Bot, 
   Check, 
   X, 
   Info, 
@@ -38,27 +37,22 @@ const AsinRow = ({
   dateRange,
   onChatAboutCheck
 }: AsinRowProps) => {
-  // State for handling timeline selection
   const [selectionActive, setSelectionActive] = useState(false);
   const [selectionStart, setSelectionStart] = useState<number | null>(null);
   const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
   const [annotationMode, setAnnotationMode] = useState<"none" | "point" | "range">("none");
   
-  // State for handling annotation input
   const [annotationText, setAnnotationText] = useState("");
   const [annotationPosition, setAnnotationPosition] = useState({ x: 0, y: 0 });
   
-  // State for agent check details
   const [activeCheck, setActiveCheck] = useState<{
     date: string;
     checkId: string;
   } | null>(null);
   
-  // Reference to the annotation input for click outside detection
   const annotationInputRef = useRef<HTMLDivElement>(null);
   const checkDetailsRef = useRef<HTMLDivElement>(null);
   
-  // Handle click outside of annotation input
   useClickOutside(annotationInputRef, () => {
     if (annotationMode !== "none") {
       setAnnotationMode("none");
@@ -66,15 +60,12 @@ const AsinRow = ({
     }
   });
   
-  // Handle click outside of check details
   useClickOutside(checkDetailsRef, () => {
     setActiveCheck(null);
   });
   
-  // Handle annotation creation
   const handleCreateAnnotation = () => {
     if (annotationText.trim()) {
-      // In a real application, save this annotation to the database
       console.log("Creating annotation:", {
         asinId: asin.id,
         text: annotationText,
@@ -82,7 +73,6 @@ const AsinRow = ({
         position: annotationMode === "point" ? annotationPosition : { start: selectionStart, end: selectionEnd }
       });
       
-      // Reset state
       setAnnotationMode("none");
       setAnnotationText("");
       setSelectionStart(null);
@@ -90,13 +80,11 @@ const AsinRow = ({
     }
   };
   
-  // Filter agent checks to match the date range
   const filteredAgentChecks = asin.agentChecks.filter(check => {
     const checkDate = new Date(check.date);
     return checkDate >= dateRange.start && checkDate <= dateRange.end;
   });
   
-  // Display agent check details
   const renderCheckDetails = () => {
     if (!activeCheck) return null;
     
@@ -107,7 +95,6 @@ const AsinRow = ({
     const checkDetail = dailyCheck.checks.find(c => c.id === activeCheck.checkId);
     if (!checkDetail) return null;
     
-    // Position in the middle of the screen for now
     const positionStyle = {
       top: `${window.innerHeight / 2 - 100}px`,
       left: `${window.innerWidth / 2 - 150}px`
@@ -182,7 +169,6 @@ const AsinRow = ({
       transition={{ duration: 0.3 }}
       className="overflow-hidden border-b border-gray-100 last:border-b-0"
     >
-      {/* ASIN header row with expand/collapse functionality */}
       <div 
         className="py-2 px-3 grid grid-cols-[180px_1fr] items-center cursor-pointer hover:bg-gray-50 rounded-sm"
         onClick={toggleExpand}
@@ -196,7 +182,6 @@ const AsinRow = ({
           <span className="font-medium text-sm">{asin.name}</span>
         </div>
         
-        {/* Always show revenue metric in collapsed state */}
         <div className="relative h-8">
           <MetricTimeline 
             data={asin.metrics.revenue}
@@ -228,7 +213,6 @@ const AsinRow = ({
         </div>
       </div>
       
-      {/* Expanded metrics */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -238,7 +222,6 @@ const AsinRow = ({
             transition={{ duration: 0.2 }}
             className="ml-10 space-y-1 pb-2"
           >
-            {/* Always include revenue at the top */}
             <div className="py-1 grid grid-cols-[180px_1fr] items-center">
               <div className="text-sm text-muted-foreground">Revenue</div>
               <div className="relative h-12">
@@ -255,7 +238,6 @@ const AsinRow = ({
                         y: event.clientY - rect.top
                       });
                       
-                      // Position the annotation input near the click
                       const annotationInput = annotationInputRef.current;
                       if (annotationInput) {
                         annotationInput.style.left = `${event.clientX}px`;
@@ -280,14 +262,12 @@ const AsinRow = ({
               </div>
             </div>
             
-            {/* Show other selected metrics */}
             {selectedMetrics
-              .filter(metricId => metricId !== "revenue") // Revenue is already shown
+              .filter(metricId => metricId !== "revenue")
               .map(metricId => {
                 const metricData = asin.metrics[metricId as keyof typeof asin.metrics];
                 if (!metricData) return null;
                 
-                // Find the corresponding metric definition
                 const metricDef = AVAILABLE_METRICS.find(m => m.id === metricId);
                 if (!metricDef) return null;
                 
@@ -311,7 +291,6 @@ const AsinRow = ({
                               y: event.clientY - rect.top
                             });
                             
-                            // Position the annotation input near the click
                             const annotationInput = annotationInputRef.current;
                             if (annotationInput) {
                               annotationInput.style.left = `${event.clientX}px`;
@@ -338,76 +317,71 @@ const AsinRow = ({
                 );
               })}
             
-            {/* Agent Checks row */}
             <div className="py-1 grid grid-cols-[180px_1fr] items-center">
               <div className="text-sm text-muted-foreground flex items-center">
-                <Robot className="h-4 w-4 mr-1" />
+                <Bot className="h-4 w-4 mr-1" />
                 <span>Agent Checks</span>
               </div>
               <div className="relative h-12 bg-gray-50 rounded">
-                <div className="flex items-center h-full">
-                  {filteredAgentChecks.map((dailyCheck, index) => {
-                    const segmentWidth = 100 / filteredAgentChecks.length;
-                    const checkDate = new Date(dailyCheck.date);
-                    
-                    return (
-                      <TooltipProvider key={index}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div 
-                              className={`h-8 flex items-center justify-center cursor-pointer 
-                                ${dailyCheck.overallStatus === 'pass' 
-                                  ? 'text-green-600 hover:bg-green-50' 
-                                  : dailyCheck.overallStatus === 'warning'
-                                    ? 'text-yellow-600 hover:bg-yellow-50'
-                                    : 'text-red-600 hover:bg-red-50'
-                                }`}
-                              style={{ width: `${segmentWidth}%` }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                
-                                // Show first failing check, or first warning, or first passing check
-                                const failedCheck = dailyCheck.checks.find(c => c.result === 'fail');
-                                const warningCheck = dailyCheck.checks.find(c => c.result === 'warning');
-                                const checkToShow = failedCheck || warningCheck || dailyCheck.checks[0];
-                                
-                                if (checkToShow) {
-                                  setActiveCheck({
-                                    date: dailyCheck.date,
-                                    checkId: checkToShow.id
-                                  });
-                                }
-                              }}
-                            >
-                              {dailyCheck.overallStatus === 'pass' ? (
-                                <Check className="h-4 w-4" />
-                              ) : dailyCheck.overallStatus === 'warning' ? (
-                                <Info className="h-4 w-4" />
-                              ) : (
-                                <X className="h-4 w-4" />
-                              )}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <div className="text-xs">
-                              <p className="font-medium mb-1">{checkDate.toLocaleDateString()}</p>
-                              <p>
-                                {dailyCheck.checks.filter(c => c.result === 'pass').length} passed, {" "}
-                                {dailyCheck.checks.filter(c => c.result === 'warning').length} warnings, {" "}
-                                {dailyCheck.checks.filter(c => c.result === 'fail').length} failed
-                              </p>
-                              <p className="text-xs mt-1 text-muted-foreground">Click to view details</p>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    );
-                  })}
-                </div>
+                {filteredAgentChecks.map((dailyCheck, index) => {
+                  const segmentWidth = 100 / filteredAgentChecks.length;
+                  const checkDate = new Date(dailyCheck.date);
+                  
+                  return (
+                    <TooltipProvider key={index}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className={`h-8 flex items-center justify-center cursor-pointer 
+                              ${dailyCheck.overallStatus === 'pass' 
+                                ? 'text-green-600 hover:bg-green-50' 
+                                : dailyCheck.overallStatus === 'warning'
+                                  ? 'text-yellow-600 hover:bg-yellow-50'
+                                  : 'text-red-600 hover:bg-red-50'
+                              }`}
+                            style={{ width: `${segmentWidth}%` }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              
+                              const failedCheck = dailyCheck.checks.find(c => c.result === 'fail');
+                              const warningCheck = dailyCheck.checks.find(c => c.result === 'warning');
+                              const checkToShow = failedCheck || warningCheck || dailyCheck.checks[0];
+                              
+                              if (checkToShow) {
+                                setActiveCheck({
+                                  date: dailyCheck.date,
+                                  checkId: checkToShow.id
+                                });
+                              }
+                            }}
+                          >
+                            {dailyCheck.overallStatus === 'pass' ? (
+                              <Check className="h-4 w-4" />
+                            ) : dailyCheck.overallStatus === 'warning' ? (
+                              <Info className="h-4 w-4" />
+                            ) : (
+                              <X className="h-4 w-4" />
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="text-xs">
+                            <p className="font-medium mb-1">{checkDate.toLocaleDateString()}</p>
+                            <p>
+                              {dailyCheck.checks.filter(c => c.result === 'pass').length} passed, {" "}
+                              {dailyCheck.checks.filter(c => c.result === 'warning').length} warnings, {" "}
+                              {dailyCheck.checks.filter(c => c.result === 'fail').length} failed
+                            </p>
+                            <p className="text-xs mt-1 text-muted-foreground">Click to view details</p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
               </div>
             </div>
             
-            {/* If there's an active check, show details for each check */}
             {activeCheck && (
               <div className="py-1 grid grid-cols-[180px_1fr] items-center">
                 <div className="text-sm text-muted-foreground">
@@ -459,7 +433,6 @@ const AsinRow = ({
               </div>
             )}
             
-            {/* Annotation controls */}
             <div className="pt-2 flex gap-2">
               <TooltipProvider>
                 <Tooltip>
@@ -513,7 +486,6 @@ const AsinRow = ({
         )}
       </AnimatePresence>
       
-      {/* Annotation input dialog */}
       {annotationMode !== "none" && (
         <div 
           ref={annotationInputRef}
@@ -553,13 +525,11 @@ const AsinRow = ({
         </div>
       )}
       
-      {/* Check details dialog */}
       {renderCheckDetails()}
     </motion.div>
   );
 };
 
-// Import AVAILABLE_METRICS from the parent component
 import { AVAILABLE_METRICS } from "./index";
 
 export default AsinRow;

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -11,7 +10,7 @@ import {
   CircleCheck, 
   CircleX, 
   AlertTriangle, 
-  Inventory, 
+  Package, 
   DollarSign, 
   ShoppingCart, 
   MessageSquare, 
@@ -35,7 +34,7 @@ const AgentAlerts = ({ alerts, onDismiss, onAction }: AgentAlertsProps) => {
   const getAlertIcon = (type: string) => {
     switch (type) {
       case 'inventory':
-        return <Inventory className="h-5 w-5" />;
+        return <Package className="h-5 w-5" />;
       case 'pricing':
         return <DollarSign className="h-5 w-5" />;
       case 'listing':
@@ -92,7 +91,6 @@ const AgentAlerts = ({ alerts, onDismiss, onAction }: AgentAlertsProps) => {
     );
   };
 
-  // Format the date to be more human-readable
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
