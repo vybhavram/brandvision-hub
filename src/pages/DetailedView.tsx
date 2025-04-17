@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import MainLayout from "@/components/layout/MainLayout";
 import { Badge } from "@/components/ui/badge";
@@ -7,8 +8,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Calendar, ChevronDown, Download, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
 import AsinTimeline from "@/components/detailed-view/AsinTimeline";
+import AgentSidebar from "@/components/detailed-view/AgentSidebar";
+import { toast } from "sonner";
 
 const DetailedView = () => {
+  const [dateRange, setDateRange] = useState("30"); // Default to 30 days
+
+  const handleChatAboutAsinCheck = (asinId: string, checkDate: string, checkId: string) => {
+    // This would open the agent sidebar and start a new chat about this check
+    toast.success("Opening chat about check", {
+      description: `Starting conversation about ${asinId} check from ${new Date(checkDate).toLocaleDateString()}`
+    });
+  };
+
   return (
     <MainLayout>
       <motion.div
@@ -33,11 +45,23 @@ const DetailedView = () => {
           </div>
           
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" className="h-9">
-              <Calendar className="h-4 w-4 mr-2" />
-              Last 30 Days
-              <ChevronDown className="h-4 w-4 ml-2" />
-            </Button>
+            <Select 
+              defaultValue={dateRange} 
+              onValueChange={(value) => setDateRange(value)}
+            >
+              <SelectTrigger className="w-[160px] h-9">
+                <Calendar className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Date Range" />
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">Last 7 Days</SelectItem>
+                <SelectItem value="14">Last 14 Days</SelectItem>
+                <SelectItem value="30">Last 30 Days</SelectItem>
+                <SelectItem value="60">Last 60 Days</SelectItem>
+                <SelectItem value="90">Last 90 Days</SelectItem>
+              </SelectContent>
+            </Select>
             
             <Button variant="outline" size="sm" className="h-9">
               <Filter className="h-4 w-4 mr-2" />
@@ -76,7 +100,10 @@ const DetailedView = () => {
         </div>
         
         {/* Timeline View */}
-        <AsinTimeline />
+        <AsinTimeline onChatAboutCheck={handleChatAboutAsinCheck} />
+        
+        {/* Agent Sidebar */}
+        <AgentSidebar />
       </motion.div>
     </MainLayout>
   );

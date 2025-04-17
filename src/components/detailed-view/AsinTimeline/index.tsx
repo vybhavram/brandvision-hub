@@ -26,15 +26,22 @@ export const AVAILABLE_METRICS = [
 // Generate dummy data for 40 ASINs
 const dummyData = generateDummyAsinData(40);
 
-const AsinTimeline = () => {
+interface AsinTimelineProps {
+  onChatAboutCheck?: (asinId: string, checkDate: string, checkId: string) => void;
+}
+
+const AsinTimeline = ({ onChatAboutCheck }: AsinTimelineProps) => {
   // State to manage which ASINs are expanded
   const [expandedAsins, setExpandedAsins] = useState<Record<string, boolean>>({});
   
   // State to track selected metrics (revenue is always visible)
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["revenue"]);
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["revenue", "conversionRate", "adSpend"]);
   
-  // State to track the date range (we'll use 30 days by default)
-  const [dateRange, setDateRange] = useState({ start: new Date(2025, 3, 1), end: new Date(2025, 3, 30) });
+  // State to track the date range (we'll use 14 days by default for better visibility)
+  const [dateRange, setDateRange] = useState({ 
+    start: new Date(new Date().setDate(new Date().getDate() - 14)), 
+    end: new Date() 
+  });
   
   // Toggle ASIN expansion
   const toggleAsinExpand = (asinId: string) => {
@@ -52,7 +59,7 @@ const AsinTimeline = () => {
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" className="h-9">
             <Calendar className="h-4 w-4 mr-2" />
-            Last 30 Days
+            Last 14 Days
             <ChevronDown className="h-4 w-4 ml-2" />
           </Button>
           
@@ -129,6 +136,7 @@ const AsinTimeline = () => {
                   toggleExpand={() => toggleAsinExpand(asin.id)}
                   selectedMetrics={selectedMetrics}
                   dateRange={dateRange}
+                  onChatAboutCheck={onChatAboutCheck}
                 />
               ))}
             </AnimatePresence>

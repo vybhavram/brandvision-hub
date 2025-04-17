@@ -1,11 +1,22 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronDown, Pencil, Flag } from "lucide-react";
+import { 
+  ChevronRight, 
+  ChevronDown, 
+  Pencil, 
+  Flag, 
+  Robot, 
+  Check, 
+  X, 
+  Info, 
+  MessageSquare 
+} from "lucide-react";
 import MetricTimeline from "./MetricTimeline";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Asin } from "@/lib/dummy-data";
+import { Asin, DailyAgentChecks } from "@/lib/dummy-data";
+import { formatValue } from "@/lib/format-utils";
 
 interface AsinRowProps {
   asin: Asin;
@@ -16,9 +27,17 @@ interface AsinRowProps {
     start: Date;
     end: Date;
   };
+  onChatAboutCheck?: (asinId: string, checkDate: string, checkId: string) => void;
 }
 
-const AsinRow = ({ asin, isExpanded, toggleExpand, selectedMetrics, dateRange }: AsinRowProps) => {
+const AsinRow = ({ 
+  asin, 
+  isExpanded, 
+  toggleExpand, 
+  selectedMetrics, 
+  dateRange,
+  onChatAboutCheck
+}: AsinRowProps) => {
   // State for handling timeline selection
   const [selectionActive, setSelectionActive] = useState(false);
   const [selectionStart, setSelectionStart] = useState<number | null>(null);
@@ -29,8 +48,15 @@ const AsinRow = ({ asin, isExpanded, toggleExpand, selectedMetrics, dateRange }:
   const [annotationText, setAnnotationText] = useState("");
   const [annotationPosition, setAnnotationPosition] = useState({ x: 0, y: 0 });
   
+  // State for agent check details
+  const [activeCheck, setActiveCheck] = useState<{
+    date: string;
+    checkId: string;
+  } | null>(null);
+  
   // Reference to the annotation input for click outside detection
   const annotationInputRef = useRef<HTMLDivElement>(null);
+  const checkDetailsRef = useRef<HTMLDivElement>(null);
   
   // Handle click outside of annotation input
   useClickOutside(annotationInputRef, () => {
@@ -38,6 +64,11 @@ const AsinRow = ({ asin, isExpanded, toggleExpand, selectedMetrics, dateRange }:
       setAnnotationMode("none");
       setAnnotationText("");
     }
+  });
+  
+  // Handle click outside of check details
+  useClickOutside(checkDetailsRef, () => {
+    setActiveCheck(null);
   });
   
   // Handle annotation creation
@@ -57,6 +88,90 @@ const AsinRow = ({ asin, isExpanded, toggleExpand, selectedMetrics, dateRange }:
       setSelectionStart(null);
       setSelectionEnd(null);
     }
+  };
+  
+  // Filter agent checks to match the date range
+  const filteredAgentChecks = asin.agentChecks.filter(check => {
+    const checkDate = new Date(check.date);
+    return checkDate >= dateRange.start && checkDate <= dateRange.end;
+  });
+  
+  // Display agent check details
+  const renderCheckDetails = () => {
+    if (!activeCheck) return null;
+    
+    const checkDate = new Date(activeCheck.date);
+    const dailyCheck = asin.agentChecks.find(c => new Date(c.date).toDateString() === checkDate.toDateString());
+    if (!dailyCheck) return null;
+    
+    const checkDetail = dailyCheck.checks.find(c => c.id === activeCheck.checkId);
+    if (!checkDetail) return null;
+    
+    // Position in the middle of the screen for now
+    const positionStyle = {
+      top: `${window.innerHeight / 2 - 100}px`,
+      left: `${window.innerWidth / 2 - 150}px`
+    };
+    
+    return (
+      <div 
+        ref={checkDetailsRef}
+        className="fixed z-50 bg-white p-4 rounded-md shadow-lg border border-gray-200 w-[300px]"
+        style={positionStyle}
+      >
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="font-medium text-sm">{checkDetail.name}</h3>
+          <button 
+            className="text-gray-500 hover:text-gray-700"
+            onClick={() => setActiveCheck(null)}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        
+        <div className="mb-3">
+          <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+            checkDetail.result === 'pass' 
+              ? 'bg-green-100 text-green-800' 
+              : checkDetail.result === 'warning'
+                ? 'bg-yellow-100 text-yellow-800'
+                : 'bg-red-100 text-red-800'
+          }`}>
+            {checkDetail.result === 'pass' ? (
+              <Check className="h-3 w-3 mr-1" />
+            ) : checkDetail.result === 'warning' ? (
+              <Info className="h-3 w-3 mr-1" />
+            ) : (
+              <X className="h-3 w-3 mr-1" />
+            )}
+            {checkDetail.result.charAt(0).toUpperCase() + checkDetail.result.slice(1)}
+          </div>
+        </div>
+        
+        <p className="text-xs text-gray-600 mb-2">{checkDetail.description}</p>
+        
+        {checkDetail.details && (
+          <div className="text-xs p-2 bg-gray-50 rounded mb-3">
+            {checkDetail.details}
+          </div>
+        )}
+        
+        <div className="flex justify-end">
+          <button 
+            className="flex items-center text-xs text-blue-600 hover:text-blue-800"
+            onClick={() => {
+              if (onChatAboutCheck) {
+                onChatAboutCheck(asin.id, activeCheck.date, activeCheck.checkId);
+                setActiveCheck(null);
+              }
+            }}
+          >
+            <MessageSquare className="h-3 w-3 mr-1" />
+            Chat about this issue
+          </button>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -222,7 +337,128 @@ const AsinRow = ({ asin, isExpanded, toggleExpand, selectedMetrics, dateRange }:
                   </div>
                 );
               })}
-              
+            
+            {/* Agent Checks row */}
+            <div className="py-1 grid grid-cols-[180px_1fr] items-center">
+              <div className="text-sm text-muted-foreground flex items-center">
+                <Robot className="h-4 w-4 mr-1" />
+                <span>Agent Checks</span>
+              </div>
+              <div className="relative h-12 bg-gray-50 rounded">
+                <div className="flex items-center h-full">
+                  {filteredAgentChecks.map((dailyCheck, index) => {
+                    const segmentWidth = 100 / filteredAgentChecks.length;
+                    const checkDate = new Date(dailyCheck.date);
+                    
+                    return (
+                      <TooltipProvider key={index}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div 
+                              className={`h-8 flex items-center justify-center cursor-pointer 
+                                ${dailyCheck.overallStatus === 'pass' 
+                                  ? 'text-green-600 hover:bg-green-50' 
+                                  : dailyCheck.overallStatus === 'warning'
+                                    ? 'text-yellow-600 hover:bg-yellow-50'
+                                    : 'text-red-600 hover:bg-red-50'
+                                }`}
+                              style={{ width: `${segmentWidth}%` }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                
+                                // Show first failing check, or first warning, or first passing check
+                                const failedCheck = dailyCheck.checks.find(c => c.result === 'fail');
+                                const warningCheck = dailyCheck.checks.find(c => c.result === 'warning');
+                                const checkToShow = failedCheck || warningCheck || dailyCheck.checks[0];
+                                
+                                if (checkToShow) {
+                                  setActiveCheck({
+                                    date: dailyCheck.date,
+                                    checkId: checkToShow.id
+                                  });
+                                }
+                              }}
+                            >
+                              {dailyCheck.overallStatus === 'pass' ? (
+                                <Check className="h-4 w-4" />
+                              ) : dailyCheck.overallStatus === 'warning' ? (
+                                <Info className="h-4 w-4" />
+                              ) : (
+                                <X className="h-4 w-4" />
+                              )}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <div className="text-xs">
+                              <p className="font-medium mb-1">{checkDate.toLocaleDateString()}</p>
+                              <p>
+                                {dailyCheck.checks.filter(c => c.result === 'pass').length} passed, {" "}
+                                {dailyCheck.checks.filter(c => c.result === 'warning').length} warnings, {" "}
+                                {dailyCheck.checks.filter(c => c.result === 'fail').length} failed
+                              </p>
+                              <p className="text-xs mt-1 text-muted-foreground">Click to view details</p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            
+            {/* If there's an active check, show details for each check */}
+            {activeCheck && (
+              <div className="py-1 grid grid-cols-[180px_1fr] items-center">
+                <div className="text-sm text-muted-foreground">
+                  Check Details
+                </div>
+                <div className="bg-gray-50 rounded p-2 text-xs">
+                  {(() => {
+                    const checkDate = new Date(activeCheck.date);
+                    const dailyCheck = asin.agentChecks.find(c => 
+                      new Date(c.date).toDateString() === checkDate.toDateString()
+                    );
+                    
+                    if (!dailyCheck) return <p>No checks found for this date</p>;
+                    
+                    return (
+                      <div className="grid grid-cols-3 gap-2">
+                        {dailyCheck.checks.map(check => (
+                          <div 
+                            key={check.id}
+                            className={`p-2 rounded border cursor-pointer
+                              ${check.id === activeCheck.checkId ? 'bg-blue-50 border-blue-200' : 'border-gray-200 hover:bg-gray-100'}
+                              ${check.result === 'pass' 
+                                ? 'text-green-700 border-green-200' 
+                                : check.result === 'warning'
+                                  ? 'text-yellow-700 border-yellow-200'
+                                  : 'text-red-700 border-red-200'
+                              }`}
+                            onClick={() => setActiveCheck({ 
+                              date: activeCheck.date, 
+                              checkId: check.id 
+                            })}
+                          >
+                            <div className="flex items-center mb-1">
+                              {check.result === 'pass' ? (
+                                <Check className="h-3 w-3 mr-1" />
+                              ) : check.result === 'warning' ? (
+                                <Info className="h-3 w-3 mr-1" />
+                              ) : (
+                                <X className="h-3 w-3 mr-1" />
+                              )}
+                              <span className="font-medium truncate">{check.name}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
+            
             {/* Annotation controls */}
             <div className="pt-2 flex gap-2">
               <TooltipProvider>
@@ -234,7 +470,10 @@ const AsinRow = ({ asin, isExpanded, toggleExpand, selectedMetrics, dateRange }:
                           ? "bg-primary text-white" 
                           : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       }`}
-                      onClick={() => setAnnotationMode(prev => prev === "point" ? "none" : "point")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAnnotationMode(prev => prev === "point" ? "none" : "point");
+                      }}
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
@@ -254,7 +493,8 @@ const AsinRow = ({ asin, isExpanded, toggleExpand, selectedMetrics, dateRange }:
                           ? "bg-primary text-white" 
                           : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       }`}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setAnnotationMode(prev => prev === "range" ? "none" : "range");
                         setSelectionStart(null);
                         setSelectionEnd(null);
@@ -312,6 +552,9 @@ const AsinRow = ({ asin, isExpanded, toggleExpand, selectedMetrics, dateRange }:
           </div>
         </div>
       )}
+      
+      {/* Check details dialog */}
+      {renderCheckDetails()}
     </motion.div>
   );
 };
