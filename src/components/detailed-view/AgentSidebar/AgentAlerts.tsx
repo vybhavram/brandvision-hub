@@ -1,197 +1,129 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Alert, 
-  AlertDescription, 
-  AlertTitle 
-} from "@/components/ui/alert";
-import { 
-  Bell, 
-  CircleCheck, 
-  CircleX, 
-  AlertTriangle, 
-  Package, 
-  DollarSign, 
-  ShoppingCart, 
-  MessageSquare, 
-  Users, 
-  BarChart 
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { AgentAlert } from "@/lib/dummy-data";
 
-interface AgentAlertsProps {
-  alerts: AgentAlert[];
-  onDismiss: (alertId: string) => void;
-  onAction: (alertId: string) => void;
+import React from "react";
+import { AlertCircle, Info, X, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+export interface Alert {
+  id: string;
+  title: string;
+  description: string;
+  category: 'inventory' | 'pricing' | 'listing' | 'reviews' | 'competitive' | 'advertising';
+  date: string;
 }
 
-const AgentAlerts = ({ alerts, onDismiss, onAction }: AgentAlertsProps) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-  const pendingAlerts = alerts.filter(alert => alert.status === 'pending');
+interface AgentAlertsProps {
+  alerts: Alert[];
+  onDismiss: (alertId: string) => void;
+}
 
-  const getAlertIcon = (type: string) => {
-    switch (type) {
-      case 'inventory':
-        return <Package className="h-5 w-5" />;
-      case 'pricing':
-        return <DollarSign className="h-5 w-5" />;
-      case 'listing':
-        return <ShoppingCart className="h-5 w-5" />;
-      case 'reviews':
-        return <MessageSquare className="h-5 w-5" />;
-      case 'competitive':
-        return <Users className="h-5 w-5" />;
-      case 'advertising':
-        return <BarChart className="h-5 w-5" />;
-      default:
-        return <AlertTriangle className="h-5 w-5" />;
-    }
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical':
-        return "bg-red-100 text-red-800 border-red-200";
-      case 'high':
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case 'medium':
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case 'low':
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getSeverityBadge = (severity: string) => {
-    let color;
-    switch (severity) {
-      case 'critical':
-        color = "bg-red-500 hover:bg-red-600";
-        break;
-      case 'high':
-        color = "bg-orange-500 hover:bg-orange-600";
-        break;
-      case 'medium':
-        color = "bg-yellow-500 hover:bg-yellow-600";
-        break;
-      case 'low':
-        color = "bg-blue-500 hover:bg-blue-600";
-        break;
-      default:
-        color = "bg-gray-500 hover:bg-gray-600";
-    }
-    
-    return (
-      <Badge className={`${color} capitalize`}>
-        {severity}
-      </Badge>
-    );
-  };
-
-  const formatDate = (dateString: string) => {
+const AgentAlerts: React.FC<AgentAlertsProps> = ({ alerts, onDismiss }) => {
+  // Format date to relative time (e.g., "2 hours ago")
+  const formatRelativeTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.round(diffMs / 60000);
-    const diffHours = Math.round(diffMs / 3600000);
-    const diffDays = Math.round(diffMs / 86400000);
-
+    
+    const diffMins = Math.floor(diffMs / 60000);
     if (diffMins < 60) {
-      return `${diffMins} ${diffMins === 1 ? 'minute' : 'minutes'} ago`;
-    } else if (diffHours < 24) {
-      return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
-    } else {
-      return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+      return `${diffMins}m ago`;
+    }
+    
+    const diffHours = Math.floor(diffMs / 3600000);
+    if (diffHours < 24) {
+      return `${diffHours}h ago`;
+    }
+    
+    const diffDays = Math.floor(diffMs / 86400000);
+    if (diffDays < 7) {
+      return `${diffDays}d ago`;
+    }
+    
+    return date.toLocaleDateString();
+  };
+  
+  // Get alert icon and color based on alert type
+  const getAlertStyles = (category: Alert['category']) => {
+    switch (category) {
+      case 'inventory':
+        return { icon: AlertCircle, color: 'text-red-500', bgColor: 'bg-red-50' };
+      case 'pricing':
+        return { icon: Info, color: 'text-blue-500', bgColor: 'bg-blue-50' };
+      case 'competitive':
+        return { icon: AlertCircle, color: 'text-orange-500', bgColor: 'bg-orange-50' };
+      case 'listing':
+        return { icon: Info, color: 'text-violet-500', bgColor: 'bg-violet-50' };
+      case 'reviews':
+        return { icon: AlertCircle, color: 'text-yellow-500', bgColor: 'bg-yellow-50' };
+      case 'advertising':
+        return { icon: Info, color: 'text-green-500', bgColor: 'bg-green-50' };
+      default:
+        return { icon: Info, color: 'text-gray-500', bgColor: 'bg-gray-50' };
     }
   };
-
+  
   return (
-    <div className="mb-4">
-      <div 
-        className="flex items-center justify-between p-2 bg-secondary/30 rounded-md cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="flex items-center space-x-2">
-          <Bell className="h-5 w-5 text-amber-500" />
-          <h3 className="font-medium">Agent Alerts</h3>
-          {pendingAlerts.length > 0 && (
-            <Badge className="bg-red-500 hover:bg-red-600">{pendingAlerts.length}</Badge>
-          )}
-        </div>
-        <Button variant="ghost" size="sm" onClick={(e) => {
-          e.stopPropagation();
-          setIsExpanded(!isExpanded);
-        }}>
-          {isExpanded ? "Hide" : "Show"}
-        </Button>
-      </div>
-
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-2 mt-2 overflow-hidden"
-          >
-            {pendingAlerts.length === 0 ? (
-              <div className="text-center p-4 text-muted-foreground">
-                No pending alerts at this time
-              </div>
-            ) : (
-              pendingAlerts.map((alert) => (
-                <Alert 
-                  key={alert.id} 
-                  className={`relative ${getSeverityColor(alert.severity)} transition-all duration-200 hover:shadow-md`}
+    <ScrollArea className="h-full p-4">
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Recent Alerts</h3>
+        
+        {alerts.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No alerts at the moment
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {alerts.map((alert) => {
+              const { icon: AlertIcon, color, bgColor } = getAlertStyles(alert.category);
+              
+              return (
+                <div 
+                  key={alert.id}
+                  className="relative rounded-lg border p-4 shadow-sm hover:shadow transition-shadow"
                 >
-                  <div className="flex items-start">
-                    <div className="mt-1 mr-2">
-                      {getAlertIcon(alert.type)}
+                  <div className="absolute right-2 top-2 flex items-center gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6 rounded-full opacity-50 hover:opacity-100"
+                      onClick={() => onDismiss(alert.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-full ${bgColor} ${color}`}>
+                      <AlertIcon className="h-4 w-4" />
                     </div>
+                    
                     <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <AlertTitle className="text-sm font-medium">{alert.title}</AlertTitle>
-                        {getSeverityBadge(alert.severity)}
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-medium">{alert.title}</h4>
                       </div>
-                      <AlertDescription className="mt-1 text-xs">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {alert.description}
-                      </AlertDescription>
-                      <div className="flex items-center justify-between mt-2">
+                      </p>
+                      
+                      <div className="flex justify-between items-center mt-2">
                         <span className="text-xs text-muted-foreground">
-                          {formatDate(alert.date)}
+                          {formatRelativeTime(alert.date)}
                         </span>
-                        <div className="flex space-x-1">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50"
-                            onClick={() => onDismiss(alert.id)}
-                          >
-                            <CircleX className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-7 w-7 text-green-500 hover:text-green-600 hover:bg-green-50"
-                            onClick={() => onAction(alert.id)}
-                          >
-                            <CircleCheck className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        
+                        <Button variant="ghost" size="sm" className="h-7 gap-1">
+                          <span className="text-xs">View Details</span>
+                          <ArrowRight className="h-3 w-3" />
+                        </Button>
                       </div>
                     </div>
                   </div>
-                </Alert>
-              ))
-            )}
-          </motion.div>
+                </div>
+              );
+            })}
+          </div>
         )}
-      </AnimatePresence>
-    </div>
+      </div>
+    </ScrollArea>
   );
 };
 

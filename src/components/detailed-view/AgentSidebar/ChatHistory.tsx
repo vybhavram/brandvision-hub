@@ -1,9 +1,14 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Chat } from "@/lib/dummy-data";
 import { Button } from "@/components/ui/button";
 import { History, Plus, ChevronRight } from "lucide-react";
+
+export interface Chat {
+  id: string;
+  title: string;
+  lastMessageTime: string;
+}
 
 interface ChatHistoryProps {
   chats: Chat[];

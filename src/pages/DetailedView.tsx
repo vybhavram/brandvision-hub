@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import MainLayout from "@/components/layout/MainLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,12 +22,7 @@ const DetailedView = () => {
 
   return (
     <MainLayout>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="relative"
-      >
+      <div className="relative">
         {/* Top Bar with controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div className="flex items-center">
@@ -107,7 +101,7 @@ const DetailedView = () => {
         
         {/* Agent Sidebar - docked to the side with initial state */}
         <AgentSidebar initialOpen={false} />
-      </motion.div>
+      </div>
     </MainLayout>
   );
 };

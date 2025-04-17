@@ -101,11 +101,11 @@ const AgentSidebar = ({ initialOpen = false }: AgentSidebarProps) => {
             {/* Tab content - making chat window taller */}
             <TabsContent value="chat" className="flex-1 flex flex-col p-0 overflow-hidden">
               <div className="flex flex-col h-full">
-                <div className="flex-none p-3 border-b max-h-[120px] overflow-auto">
+                <div className="flex-none p-3 border-b max-h-[180px] overflow-auto">
                   <ChatHistory 
                     chats={[
-                      { id: '1', title: 'ASIN Check Issues', date: new Date().toISOString() },
-                      { id: '2', title: 'Inventory Planning', date: new Date(Date.now() - 86400000).toISOString() },
+                      { id: '1', title: 'ASIN Check Issues', lastMessageTime: new Date().toISOString() },
+                      { id: '2', title: 'Inventory Planning', lastMessageTime: new Date(Date.now() - 86400000).toISOString() },
                     ]}
                     activeChat="1"
                     onSelectChat={(id) => console.log('Selected chat:', id)}
@@ -115,7 +115,7 @@ const AgentSidebar = ({ initialOpen = false }: AgentSidebarProps) => {
                 <div className="flex-1 overflow-hidden">
                   <AgentChat 
                     messages={[
-                      { id: '1', content: 'Hello! How can I assist you today?', sender: 'agent', timestamp: new Date().toISOString(), agent: { name: 'Brand Assistant', avatar: '😊' } },
+                      { id: '1', content: 'Hello! How can I assist you today?', role: 'assistant', timestamp: new Date().toISOString(), agent: { name: 'Brand Assistant', avatar: '😊' } },
                     ]}
                     onSendMessage={(message) => console.log('Message sent:', message)}
                   />
@@ -126,11 +126,10 @@ const AgentSidebar = ({ initialOpen = false }: AgentSidebarProps) => {
             <TabsContent value="alerts" className="flex-1 p-0 overflow-auto">
               <AgentAlerts 
                 alerts={[
-                  { id: '1', title: 'Inventory Warning', description: 'Low stock for ASIN B000101', type: 'warning', date: new Date().toISOString() },
-                  { id: '2', title: 'Price Change', description: 'Competitor price drop for ASIN B000102', type: 'info', date: new Date(Date.now() - 86400000).toISOString() },
+                  { id: '1', title: 'Inventory Warning', description: 'Low stock for ASIN B000101', category: 'inventory', date: new Date().toISOString() },
+                  { id: '2', title: 'Price Change', description: 'Competitor price drop for ASIN B000102', category: 'pricing', date: new Date(Date.now() - 86400000).toISOString() },
                 ]}
                 onDismiss={(id) => console.log('Dismissed alert:', id)}
-                onAction={(id, action) => console.log('Alert action:', id, action)}
               />
             </TabsContent>
           </Tabs>
