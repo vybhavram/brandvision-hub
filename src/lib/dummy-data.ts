@@ -532,7 +532,7 @@ export const generateMockChatHistory = (): Chat[] => {
         {
           id: 'msg-3-3',
           role: 'user',
-          content: 'Yes, please draft the updated content. Also, can you analyze which competitors have higher conversion rates and what they're doing differently?',
+          content: "Yes, please draft the updated content. Also, can you analyze which competitors have higher conversion rates and what they're doing differently?",
           timestamp: new Date(Date.now() - 4.5 * 24 * 60 * 60 * 1000).toISOString()
         },
         {

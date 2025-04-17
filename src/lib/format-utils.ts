@@ -53,10 +53,10 @@ export const formatPercentage = (value: number): string => {
  * Format a date for display
  */
 export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormatter('en-US', {
+  return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric'
-  }).format(date);
+  });
 };
 
 /**
