@@ -94,8 +94,8 @@ const AsinTimeline = ({ onChatAboutCheck }: AsinTimelineProps) => {
         onMetricsChange={setSelectedMetrics}
       />
       
-      {/* Horizontal scrollable container */}
-      <ScrollArea className="w-full overflow-x-auto" orientation="horizontal">
+      {/* Horizontal scrollable container - fixing by removing the orientation prop */}
+      <ScrollArea className="w-full overflow-x-auto">
         <div className="min-w-[800px]">
           {/* Timeline header with dates */}
           <div className="mt-6 mb-2 border-b pb-2">

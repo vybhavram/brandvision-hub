@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatValue } from "@/lib/format-utils";
 import { InfoIcon } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MetricTimelineProps {
   data: {
@@ -133,31 +132,12 @@ const MetricTimeline = ({
         />
       )}
       
-      {/* Line chart */}
+      {/* Line chart - ensuring values are prominent */}
       <svg
         className="absolute inset-0"
         viewBox={`0 0 ${data.length} ${height}`}
         preserveAspectRatio="none"
       >
-        <defs>
-          <linearGradient id={`gradient-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity="0.2" />
-            <stop offset="100%" stopColor={color} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        
-        {/* Area under the line */}
-        <path
-          d={`
-            M 0 ${normalizeValue(data[0]?.value || 0)}
-            ${data.map((d, i) => `L ${i} ${normalizeValue(d.value)}`).join(' ')}
-            L ${data.length - 1} ${height}
-            L 0 ${height}
-            Z
-          `}
-          fill={`url(#gradient-${color.replace('#', '')})`}
-        />
-        
         {/* Line itself */}
         <path
           d={`
@@ -189,7 +169,7 @@ const MetricTimeline = ({
                       x={i}
                       y={normalizeValue(d.value) - 5}
                       textAnchor="middle"
-                      fill={color}
+                      fill="black"
                       fontSize="8"
                       fontWeight="bold"
                     >
