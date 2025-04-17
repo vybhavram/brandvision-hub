@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -322,7 +323,7 @@ const AsinRow = ({
                 <Bot className="h-4 w-4 mr-1" />
                 <span>Agent Checks</span>
               </div>
-              <div className="relative h-12 bg-gray-50 rounded">
+              <div className="relative h-12 bg-transparent rounded border border-gray-100">
                 {filteredAgentChecks.map((dailyCheck, index) => {
                   const segmentWidth = 100 / filteredAgentChecks.length;
                   const checkDate = new Date(dailyCheck.date);
@@ -332,7 +333,7 @@ const AsinRow = ({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div 
-                            className={`h-8 flex items-center justify-center cursor-pointer 
+                            className={`h-8 flex items-center justify-center cursor-pointer border-r last:border-r-0 border-gray-100
                               ${dailyCheck.overallStatus === 'pass' 
                                 ? 'text-green-600 hover:bg-green-50' 
                                 : dailyCheck.overallStatus === 'warning'
@@ -387,7 +388,7 @@ const AsinRow = ({
                 <div className="text-sm text-muted-foreground">
                   Check Details
                 </div>
-                <div className="bg-gray-50 rounded p-2 text-xs">
+                <div className="bg-white rounded p-2 text-xs border border-gray-100">
                   {(() => {
                     const checkDate = new Date(activeCheck.date);
                     const dailyCheck = asin.agentChecks.find(c => 

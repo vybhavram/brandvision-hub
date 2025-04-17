@@ -94,8 +94,8 @@ const AsinTimeline = ({ onChatAboutCheck }: AsinTimelineProps) => {
         onMetricsChange={setSelectedMetrics}
       />
       
-      {/* Horizontal scrollable container - fixing by removing the orientation prop */}
-      <ScrollArea className="w-full overflow-x-auto">
+      {/* Horizontal scrollable container with proper overflow handling */}
+      <div className="overflow-x-auto pb-4 w-full">
         <div className="min-w-[800px]">
           {/* Timeline header with dates */}
           <div className="mt-6 mb-2 border-b pb-2">
@@ -109,7 +109,7 @@ const AsinTimeline = ({ onChatAboutCheck }: AsinTimelineProps) => {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="font-bold text-lg p-2 bg-secondary/30 rounded-md mb-1 cursor-pointer flex items-center"
+                  className="font-bold text-lg p-2 bg-gray-50 rounded-md mb-1 cursor-pointer flex items-center"
                   onClick={() => {
                     // Toggle all child ASINs when clicking on parent
                     const newExpandedState = !parentAsin.children.every(
@@ -148,7 +148,7 @@ const AsinTimeline = ({ onChatAboutCheck }: AsinTimelineProps) => {
             ))}
           </div>
         </div>
-      </ScrollArea>
+      </div>
     </Card>
   );
 };

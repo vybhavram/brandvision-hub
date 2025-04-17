@@ -105,8 +105,8 @@ const DetailedView = () => {
           <AsinTimeline onChatAboutCheck={handleChatAboutAsinCheck} />
         </div>
         
-        {/* Agent Sidebar - now dockable to the side */}
-        <AgentSidebar />
+        {/* Agent Sidebar - docked to the side with initial state */}
+        <AgentSidebar initialOpen={false} />
       </motion.div>
     </MainLayout>
   );

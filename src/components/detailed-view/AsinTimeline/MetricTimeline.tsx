@@ -107,13 +107,13 @@ const MetricTimeline = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* Background grid */}
-      <div className="absolute inset-0 bg-gray-50 rounded"></div>
+      {/* Light grid lines instead of colored background */}
+      <div className="absolute inset-0 bg-transparent border-b border-gray-100"></div>
       
       {/* Selection overlay */}
       {isSelectable && dragStart !== null && dragCurrent !== null && (
         <div
-          className="absolute top-0 bottom-0 bg-blue-100 opacity-40"
+          className="absolute top-0 bottom-0 bg-blue-100/30 border border-blue-200"
           style={{
             left: `${(Math.min(dragStart, dragCurrent) / data.length) * 100}%`,
             width: `${((Math.abs(dragCurrent - dragStart) + 1) / data.length) * 100}%`
@@ -124,7 +124,7 @@ const MetricTimeline = ({
       {/* Saved selection range */}
       {selectedRange && (
         <div
-          className="absolute top-0 bottom-0 bg-blue-100"
+          className="absolute top-0 bottom-0 bg-blue-100/30 border border-blue-200"
           style={{
             left: `${(selectedRange.start / data.length) * 100}%`,
             width: `${((selectedRange.end - selectedRange.start + 1) / data.length) * 100}%`
@@ -132,7 +132,7 @@ const MetricTimeline = ({
         />
       )}
       
-      {/* Line chart - ensuring values are prominent */}
+      {/* Line chart - making values more prominent */}
       <svg
         className="absolute inset-0"
         viewBox={`0 0 ${data.length} ${height}`}
@@ -160,8 +160,8 @@ const MetricTimeline = ({
               onClick={(e) => onPointClick?.(i, d.value, e)}
               className="hover:r-3 transition-all duration-150"
             />
-            {/* Show value for every 3rd point to avoid clutter */}
-            {(i % 3 === 0 || i === data.length - 1) && (
+            {/* Show value for more points */}
+            {(i % 2 === 0 || i === data.length - 1) && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -169,8 +169,8 @@ const MetricTimeline = ({
                       x={i}
                       y={normalizeValue(d.value) - 5}
                       textAnchor="middle"
-                      fill="black"
-                      fontSize="8"
+                      fill={color}
+                      fontSize="9"
                       fontWeight="bold"
                     >
                       {formatValue(d.value, 'compact')}
