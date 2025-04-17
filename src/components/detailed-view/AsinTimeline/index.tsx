@@ -9,6 +9,7 @@ import { generateDummyAsinData } from "@/lib/dummy-data";
 import { ChevronDown, Filter, Calendar, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Available metrics that can be displayed
 export const AVAILABLE_METRICS = [
@@ -93,56 +94,61 @@ const AsinTimeline = ({ onChatAboutCheck }: AsinTimelineProps) => {
         onMetricsChange={setSelectedMetrics}
       />
       
-      {/* Timeline header with dates */}
-      <div className="mt-6 mb-2 border-b pb-2">
-        <TimelineHeader dateRange={dateRange} />
-      </div>
-      
-      {/* ASIN rows */}
-      <div className="space-y-1">
-        {dummyData.map((parentAsin) => (
-          <div key={parentAsin.id} className="mb-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="font-bold text-lg p-2 bg-secondary/30 rounded-md mb-1 cursor-pointer flex items-center"
-              onClick={() => {
-                // Toggle all child ASINs when clicking on parent
-                const newExpandedState = !parentAsin.children.every(
-                  child => expandedAsins[child.id]
-                );
-                
-                const updates: Record<string, boolean> = {};
-                parentAsin.children.forEach(child => {
-                  updates[child.id] = newExpandedState;
-                });
-                
-                setExpandedAsins(prev => ({
-                  ...prev,
-                  ...updates
-                }));
-              }}
-            >
-              {parentAsin.name}
-              <ChevronDown className="h-5 w-5 ml-2" />
-            </motion.div>
-            
-            <AnimatePresence>
-              {parentAsin.children.map((asin) => (
-                <AsinRow
-                  key={asin.id}
-                  asin={asin}
-                  isExpanded={!!expandedAsins[asin.id]}
-                  toggleExpand={() => toggleAsinExpand(asin.id)}
-                  selectedMetrics={selectedMetrics}
-                  dateRange={dateRange}
-                  onChatAboutCheck={onChatAboutCheck}
-                />
-              ))}
-            </AnimatePresence>
+      {/* Horizontal scrollable container */}
+      <ScrollArea className="w-full overflow-x-auto" orientation="horizontal">
+        <div className="min-w-[800px]">
+          {/* Timeline header with dates */}
+          <div className="mt-6 mb-2 border-b pb-2">
+            <TimelineHeader dateRange={dateRange} />
           </div>
-        ))}
-      </div>
+          
+          {/* ASIN rows */}
+          <div className="space-y-1">
+            {dummyData.map((parentAsin) => (
+              <div key={parentAsin.id} className="mb-4">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="font-bold text-lg p-2 bg-secondary/30 rounded-md mb-1 cursor-pointer flex items-center"
+                  onClick={() => {
+                    // Toggle all child ASINs when clicking on parent
+                    const newExpandedState = !parentAsin.children.every(
+                      child => expandedAsins[child.id]
+                    );
+                    
+                    const updates: Record<string, boolean> = {};
+                    parentAsin.children.forEach(child => {
+                      updates[child.id] = newExpandedState;
+                    });
+                    
+                    setExpandedAsins(prev => ({
+                      ...prev,
+                      ...updates
+                    }));
+                  }}
+                >
+                  {parentAsin.name}
+                  <ChevronDown className="h-5 w-5 ml-2" />
+                </motion.div>
+                
+                <AnimatePresence>
+                  {parentAsin.children.map((asin) => (
+                    <AsinRow
+                      key={asin.id}
+                      asin={asin}
+                      isExpanded={!!expandedAsins[asin.id]}
+                      toggleExpand={() => toggleAsinExpand(asin.id)}
+                      selectedMetrics={selectedMetrics}
+                      dateRange={dateRange}
+                      onChatAboutCheck={onChatAboutCheck}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        </div>
+      </ScrollArea>
     </Card>
   );
 };

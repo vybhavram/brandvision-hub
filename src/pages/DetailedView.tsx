@@ -27,6 +27,7 @@ const DetailedView = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
+        className="relative"
       >
         {/* Top Bar with controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -99,10 +100,12 @@ const DetailedView = () => {
           </Badge>
         </div>
         
-        {/* Timeline View */}
-        <AsinTimeline onChatAboutCheck={handleChatAboutAsinCheck} />
+        {/* Timeline View with scrollable content */}
+        <div className="pr-5 md:pr-0">
+          <AsinTimeline onChatAboutCheck={handleChatAboutAsinCheck} />
+        </div>
         
-        {/* Agent Sidebar */}
+        {/* Agent Sidebar - now dockable to the side */}
         <AgentSidebar />
       </motion.div>
     </MainLayout>

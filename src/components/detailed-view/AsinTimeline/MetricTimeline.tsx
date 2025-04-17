@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatValue } from "@/lib/format-utils";
 import { InfoIcon } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MetricTimelineProps {
   data: {
@@ -168,17 +169,43 @@ const MetricTimeline = ({
           fill="none"
         />
         
-        {/* Data points */}
+        {/* Data points with values */}
         {data.map((d, i) => (
-          <circle
-            key={i}
-            cx={i}
-            cy={normalizeValue(d.value)}
-            r="2"
-            fill={color}
-            onClick={(e) => onPointClick?.(i, d.value, e)}
-            className="hover:r-3 transition-all duration-150"
-          />
+          <g key={i}>
+            <circle
+              cx={i}
+              cy={normalizeValue(d.value)}
+              r="2"
+              fill={color}
+              onClick={(e) => onPointClick?.(i, d.value, e)}
+              className="hover:r-3 transition-all duration-150"
+            />
+            {/* Show value for every 3rd point to avoid clutter */}
+            {(i % 3 === 0 || i === data.length - 1) && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <text
+                      x={i}
+                      y={normalizeValue(d.value) - 5}
+                      textAnchor="middle"
+                      fill={color}
+                      fontSize="8"
+                      fontWeight="bold"
+                    >
+                      {formatValue(d.value, 'compact')}
+                    </text>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <div className="text-xs">
+                      <p className="font-medium">{new Date(d.date).toLocaleDateString()}</p>
+                      <p>{formatValue(d.value)}</p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </g>
         ))}
       </svg>
       
